@@ -19,8 +19,6 @@ util.inherits(Steez, stream.Stream);
 // hijacking emit() to re-route "data" events
 Steez.prototype._emit = Steez.prototype.emit;
 Steez.prototype.emit = function emit() {
-  console.log("emit", arguments);
-
   // hijack data events
   if (arguments[0] === "data") {
     // if we're closing or are already closed, we don't want to let any data
@@ -42,16 +40,12 @@ Steez.prototype.emit = function emit() {
 };
 
 Steez.prototype.write = function write(data) {
-  console.log("write");
-
   this.emit("data", data);
 
   return this.writable;
 };
 
 Steez.prototype.end = function end(data) {
-  console.log("end");
-
   if (data) {
     this.write(data);
   }
@@ -60,8 +54,6 @@ Steez.prototype.end = function end(data) {
 };
 
 Steez.prototype.destroySoon = function destroySoon() {
-  console.log("destroySoon", this.queue.length);
-
   // mark as not writable.
   this.writable = false;
 
@@ -88,8 +80,6 @@ Steez.prototype.destroySoon = function destroySoon() {
 };
 
 Steez.prototype.destroy = function destroy() {
-  console.log("destroy");
-
   // mark as not readable/writable
   this.readable = false;
   this.writable = false;
@@ -102,8 +92,6 @@ Steez.prototype.destroy = function destroy() {
 };
 
 Steez.prototype.pause = function pause() {
-  console.log("pause");
-
   // mark as not writable
   this.writable = false;
 
@@ -114,8 +102,6 @@ Steez.prototype.pause = function pause() {
 };
 
 Steez.prototype.resume = function resume() {
-  console.log("resume");
-
   // we only want to resume if we're not closed and we're currently paused
   if (!this.closed && this.paused) {
     this.paused = false;
@@ -128,8 +114,6 @@ Steez.prototype.resume = function resume() {
 };
 
 Steez.prototype.flush_queue = function flush_queue() {
-  console.log("flush_queue");
-
   while (this.queue.length && !this.paused) {
     this._emit("data", this.queue.shift());
   }
