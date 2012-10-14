@@ -1,0 +1,21 @@
+{
+  "name": "steez",
+  "version": "0.0.0",
+  "description": "The g of a mack and the steez of a geezer.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/deoxxa/steez.git"
+  },
+  "keywords": [
+    "stream",
+    "template",
+    "buffer",
+    "queue",
+    "automatic",
+    "pipe",
+    "wrapper"
+  ],
+  "author": "Conrad Pankoff <deoxxa@fknsrs.biz> (http://www.fknsrs.biz/)",
+  "license": "BSD"
+}
