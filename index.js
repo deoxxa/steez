@@ -34,12 +34,13 @@ Steez.prototype.write = function write(data) {
 
 Steez.prototype.pause = function pause() {
   this.paused = true;
-  this.writable = false;
 
   return this;
 };
 
 Steez.prototype.resume = function resume() {
+//  try { throw new Error(); } catch (e) { console.log(e.stack); }
+
   if (this.closed) {
     return this;
   }
@@ -60,10 +61,9 @@ Steez.prototype.flush = function flush() {
 
   if (this.queue.length === 0) {
     if (this.closing) {
-      this.destroySoon();
-    } else if (!this.writable) {
-      this.writable = true;
-      this.emit("drain");
+      process.nextTick(this.destroySoon.bind(this));
+    } else {
+      this._emit("drain");
     }
   }
 
@@ -71,6 +71,8 @@ Steez.prototype.flush = function flush() {
 };
 
 Steez.prototype.end = function end(data) {
+//  try { throw new Error(); } catch (e) { console.log(e.stack); }
+
   if (data) {
     this.write(data);
   }
@@ -81,22 +83,16 @@ Steez.prototype.end = function end(data) {
   return this.flush();
 };
 
-Steez.prototype.can_destroy = function can_destroy() {
-  return this.queue.length === 0;
-};
-
 Steez.prototype.destroySoon = function destroySoon() {
-  if (this.queue.length) {
-    return this.flush();
-  }
+  this.writable = false;
+  this.closing = true;
 
   if (this.queue.length) {
+    this.flush();
+  }
+
+  if (this.queue.length || (typeof this.can_destroy === "function" && !this.can_destroy())) {
     return this.once("drain", this.destroySoon.bind(this));
-  }
-
-  if (!this.can_destroy()) {
-    process.nextTick(this.destroySoon.bind(this));
-    return this;
   }
 
   if (!this.closed) {
@@ -111,23 +107,24 @@ Steez.prototype.destroy = function() {
 
   this.queue.splice(0);
 
-  this.emit("end");
-  this.emit("close");
+  this._emit("end");
+  this._emit("close");
 };
 
-// lol super debugging
 /*
-for (var k in Steez.prototype) {
-  if (!Object.hasOwnProperty.apply(Steez.prototype, [k])) {
-    continue;
-  }
+(function tracify(p) {
+  for (var k in p) {
+    if (!Object.hasOwnProperty.apply(p, [k])) {
+      continue;
+    }
 
-  (function(k) {
-    var fn = Steez.prototype[k];
-    Steez.prototype[k] = function() {
-      console.log(this.constructor.name, k, arguments);
-      return fn.apply(this, arguments);
-    };
-  }(k));
-}
+    (function(k) {
+      var fn = p[k];
+      p[k] = function() {
+        console.log(this.constructor.name, p.constructor.name, k, Array.prototype.slice.apply(arguments));
+        return fn.apply(this, arguments);
+      };
+    }(k));
+  }
+}(Steez.prototype));
 */
