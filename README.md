@@ -43,7 +43,7 @@ util.inherits(ChunkReverser, Steez);
 ChunkReverser.prototype.write = function write(data) {
   this.emit("data", Buffer(data.toString().split("").reverse().join("")));
 
-  return this.writable;
+  return !this.paused && this.writable;
 };
 
 var chunk_reverser = new ChunkReverser();

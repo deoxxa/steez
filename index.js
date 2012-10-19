@@ -29,7 +29,7 @@ Steez.prototype.emit = function emit() {
 Steez.prototype.write = function write(data) {
   this.emit("data", data);
 
-  return this.writable;
+  return !this.paused && this.writable;
 };
 
 Steez.prototype.pause = function pause() {
