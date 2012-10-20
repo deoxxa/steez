@@ -44,7 +44,7 @@ Steez.prototype._pause = function _pause(pindex) {
 };
 
 Steez.prototype.resume = function resume() {
-  return this.resume(1);
+  return this._resume(1);
 };
 
 Steez.prototype._resume = function _resume(pindex) {
