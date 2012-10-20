@@ -48,7 +48,9 @@ Steez.prototype.resume = function resume() {
 };
 
 Steez.prototype._resume = function _resume(pindex) {
-  this.paused ^= pindex;
+  if (this.paused & pindex) {
+    this.paused ^= pindex;
+  }
 
   if (this.closed) {
     return this;
