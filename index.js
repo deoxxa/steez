@@ -7,7 +7,8 @@ var Steez = module.exports = function Steez() {
   this.writable = true;
   this.readable = true;
 
-  this.paused = false;
+  this.pindex = 1;
+  this.paused = 0;
   this.closing = false;
   this.closed = false;
 
@@ -33,19 +34,25 @@ Steez.prototype.write = function write(data) {
 };
 
 Steez.prototype.pause = function pause() {
-  this.paused = true;
+  return this._pause(1);
+};
+
+Steez.prototype._pause = function _pause(pindex) {
+  this.paused |= pindex;
 
   return this;
 };
 
 Steez.prototype.resume = function resume() {
-//  try { throw new Error(); } catch (e) { console.log(e.stack); }
+  return this.resume(1);
+};
+
+Steez.prototype._resume = function _resume(pindex) {
+  this.paused ^= pindex;
 
   if (this.closed) {
     return this;
   }
-
-  this.paused = false;
 
   return this.flush();
 };
@@ -71,8 +78,6 @@ Steez.prototype.flush = function flush() {
 };
 
 Steez.prototype.end = function end(data) {
-//  try { throw new Error(); } catch (e) { console.log(e.stack); }
-
   if (data) {
     this.write(data);
   }
@@ -109,6 +114,25 @@ Steez.prototype.destroy = function() {
 
   this._emit("end");
   this._emit("close");
+};
+
+Steez.prototype._pipe = Steez.prototype.pipe;
+Steez.prototype.pipe = function(target) {
+  var pindex = Math.pow(2, this.pindex++);
+
+  var shim = Object.create(this);
+
+  shim.pause = function() {
+    console.log("pause", pindex);
+    return this._pause(pindex);
+  };
+
+  shim.resume = function() {
+    console.log("resume", pindex);
+    return this._resume(pindex);
+  };
+
+  return this._pipe.apply(shim, arguments);
 };
 
 /*
