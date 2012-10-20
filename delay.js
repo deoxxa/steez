@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-var fs = require("fs"),
-    util = require("util");
+var util = require("util");
 
 var Steez = require("./index");
 
