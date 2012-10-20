@@ -64,3 +64,4 @@ source.pipe(target_b).pipe(printer_b);
 for (var i=0;i<25;++i) {
   source.write(i);
 }
+source.end();
