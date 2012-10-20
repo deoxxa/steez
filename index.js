@@ -116,27 +116,27 @@ Steez.prototype.destroy = function() {
   this._emit("close");
 };
 
-/*
 Steez.prototype._pipe = Steez.prototype.pipe;
 Steez.prototype.pipe = function(target) {
-  var pindex = Math.pow(2, this.pindex++);
+  var pindex = Math.pow(2, this.pindex++),
+      shim = {};
 
-  var self = this,
-      shim = Object.create(self);
+  shim.__defineGetter__('readable', function () { return this.readable }.bind(this));
+  shim.__defineGetter__('writable', function () { return this.readable }.bind(this));
+
+  shim.removeListener = this.removeListener.bind(this);
+  shim.on = this.on.bind(this);
 
   shim.pause = function() {
-    console.log("pause", pindex);
-    return self._pause(pindex);
-  };
+    return this._pause(pindex);
+  }.bind(this);
 
   shim.resume = function() {
-    console.log("resume", pindex);
-    return self._resume(pindex);
-  };
+    return this._resume(pindex);
+  }.bind(this);
 
   return this._pipe.apply(shim, arguments);
 };
-*/
 
 /*
 (function tracify(p) {

@@ -16,6 +16,14 @@
     "pipe",
     "wrapper"
   ],
+  "devDependencies": {
+    "buster": "*",
+    "concat-stream": "*",
+    "async": "*"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/buster-test"
+  },
   "author": "Conrad Pankoff <deoxxa@fknsrs.biz> (http://www.fknsrs.biz/)",
   "license": "BSD"
 }
