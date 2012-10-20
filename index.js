@@ -116,6 +116,7 @@ Steez.prototype.destroy = function() {
   this._emit("close");
 };
 
+/*
 Steez.prototype._pipe = Steez.prototype.pipe;
 Steez.prototype.pipe = function(target) {
   var pindex = Math.pow(2, this.pindex++);
@@ -135,6 +136,7 @@ Steez.prototype.pipe = function(target) {
 
   return this._pipe.apply(shim, arguments);
 };
+*/
 
 /*
 (function tracify(p) {
