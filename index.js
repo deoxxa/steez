@@ -44,7 +44,7 @@ Steez.prototype._pause = function _pause(pindex) {
 };
 
 Steez.prototype.resume = function resume() {
-  return this.resume(1);
+  return this._resume(1);
 };
 
 Steez.prototype._resume = function _resume(pindex) {
@@ -118,19 +118,22 @@ Steez.prototype.destroy = function() {
 
 Steez.prototype._pipe = Steez.prototype.pipe;
 Steez.prototype.pipe = function(target) {
-  var pindex = Math.pow(2, this.pindex++);
+  var pindex = Math.pow(2, this.pindex++),
+      shim = {};
 
-  var shim = Object.create(this);
+  shim.__defineGetter__('readable', function () { return this.readable }.bind(this));
+  shim.__defineGetter__('writable', function () { return this.readable }.bind(this));
+
+  shim.removeListener = this.removeListener.bind(this);
+  shim.on = this.on.bind(this);
 
   shim.pause = function() {
-    console.log("pause", pindex);
     return this._pause(pindex);
-  };
+  }.bind(this);
 
   shim.resume = function() {
-    console.log("resume", pindex);
     return this._resume(pindex);
-  };
+  }.bind(this);
 
   return this._pipe.apply(shim, arguments);
 };
