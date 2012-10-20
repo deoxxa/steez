@@ -120,16 +120,17 @@ Steez.prototype._pipe = Steez.prototype.pipe;
 Steez.prototype.pipe = function(target) {
   var pindex = Math.pow(2, this.pindex++);
 
-  var shim = Object.create(this);
+  var self = this,
+      shim = Object.create(self);
 
   shim.pause = function() {
     console.log("pause", pindex);
-    return this._pause(pindex);
+    return self._pause(pindex);
   };
 
   shim.resume = function() {
     console.log("resume", pindex);
-    return this._resume(pindex);
+    return self._resume(pindex);
   };
 
   return this._pipe.apply(shim, arguments);
