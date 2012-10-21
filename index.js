@@ -103,8 +103,10 @@ Steez.prototype.destroySoon = function destroySoon() {
   }
 
   if (!this.closed) {
-    this.destroy();
+    return this.destroy();
   }
+
+  return this;
 };
 
 Steez.prototype.destroy = function() {
@@ -116,6 +118,8 @@ Steez.prototype.destroy = function() {
 
   this._emit("end");
   this._emit("close");
+
+  return this;
 };
 
 Steez.prototype._pipe = Steez.prototype.pipe;
