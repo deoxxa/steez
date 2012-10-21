@@ -1,81 +1,107 @@
-var buster       = require('buster')
-  , fs           = require('fs')
-  , util         = require('util')
-  , async        = require('async')
+var buster     = require('buster')
+  , fs         = require('fs')
+  , async      = require('async')
+  , SlowStream = require('slow-stream')
+  , assert     = buster.assert
+  , Boganizer  = require('./boganizer')
 
-  , assert       = buster.assert
-  , Steez        = require('../')
+  , verifyBoganFile = function (file, callback) {
+      fs.readFile(file, function (err, data) {
+        refute(err)
+        return callback(err)
 
-  , boganData    =
-        "He's got a massive waratah flamin he's got a massive aussie salute. As cross as a arvo also as cross as a cut lunch. She'll be right hottie also as cunning as a turps. As cunning as a sunnies bloody gutful of tucker. She'll be right dickhead flamin shazza got us some shag on a rock. He's got a massive bog standard heaps as stands out like bazza. You little ripper dipstick piece of piss as stands out like porky.\n"
-      + "He's got a massive ridgy-didge mate come a cane toad. Trent from punchy road train flamin as busy as a dickhead. He hasn't got a boozer it'll be cockie. She'll be right mappa tassie how gutful of show pony. As dry as a decent nik my flat out like a ridgy-didge. We're going slaps when as cunning as a crook. As cunning as a rage on she'll be right damper. Get a dog up ya booze with as busy as a paddock.\n"
-      + "Lets throw a maccas my as cunning as a fisho. Trent from punchy ropeable piece of piss as dry as a fair go. Grab us a cracker no worries lets get some chokkie. Lets throw a durry no worries he's got a massive drongo. Grab us a stonkered flamin she'll be right hoon. She'll be right fisho heaps she'll be right lizard drinking. He's got a massive stoked where it'll be going off. As cross as a pig's arse mate lets get some sheila. As cross as a metho my lets throw a digger. It'll be garbo no dramas flat out like a kero. As busy as a swagger mate we're going grog.\n"
-      + "Stands out like a schooner bloody as cross as a truckie. She'll be right rip snorter flamin she'll be right butcher. Trent from punchy flick to as dry as a longneck. Gutful of yabber flamin shazza got us some gutta. As dry as a chunder flamin lets get some pozzy. She'll be right cut lunch to flat out like a longneck. strewth when gutful of flick. As dry as a gyno how as busy as a fruit loop. It'll be banana bender flamin come a true blue. As dry as a g'day flamin you little ripper divvy van. Trent from punchy banana bender when as cross as a bludger.\n"
-      + "As cunning as a mates how she'll be right tucker. Stands out like a his blood's worth bottling flamin she'll be right wobbly. Lets throw a pav when stands out like a mokkies. She'll be right butcher when she'll be right wuss. Built like a longneck piece of piss built like a parma. He hasn't got a dipstick where gutful of joey. He's got a massive avos no dramas she'll be right sanger. As cross as a freo piece of piss as busy as a sickie. Stands out like a bunyip to grab us a bail up. Lets get some bloke flamin it'll be rego. captain cook piece of piss as dry as a milk bar.\n"
-      + "Lets get some dunny no dramas she'll be right fly wire. bludger how it'll be jumbuck. Shazza got us some fisho uluru. You little ripper crook with you little ripper struth. He hasn't got a wuss where shazza got us some kindie. He's got a massive give it a burl heaps lets throw a ripper. He hasn't got a slaps shazza got us some big smoke. As stands out like holden how bushranger. As busy as a yobbo my shazza got us some fair go. As dry as a corker how built like a flake.\n"
-      + "It'll be chunder where grab us a bottlo. As busy as a greenie as cross as a boozer. He's got a massive dipstick piece of piss as dry as a thingo. Come a bizzo where he's got a massive stoked. As cunning as a fair go with as stands out like op shop. Gutful of decent nik flamin trent from punchy aussie salute. As dry as a frog in a sock with as dry as a ocker. As busy as a rotten piece of piss he hasn't got a bail out. Gutful of chunder when mad as a outback. Lets throw a old fella he hasn't got a prezzy.\n"
-      + "It'll be pint no worries trent from punchy larrikin. As dry as a jackaroo to as busy as a spit the dummy. As dry as a aussie salute when as cross as a ridgy-didge. Flat out like a corker no dramas as stands out like squizz. As dry as a mates bloody as dry as a chokkie. Gutful of his blood's worth bottling when grab us a cark it. Stands out like a banana bender flamin he's got a massive bitzer.\n"
-      + "He's got a massive waratah flamin he's got a massive aussie salute. As cross as a arvo also as cross as a cut lunch. She'll be right hottie also as cunning as a turps. As cunning as a sunnies bloody gutful of tucker. She'll be right dickhead flamin shazza got us some shag on a rock. He's got a massive bog standard heaps as stands out like bazza. You little ripper dipstick piece of piss as stands out like porky.\n"
-      + "He's got a massive ridgy-didge mate come a cane toad. Trent from punchy road train flamin as busy as a dickhead. He hasn't got a boozer it'll be cockie. She'll be right mappa tassie how gutful of show pony. As dry as a decent nik my flat out like a ridgy-didge. We're going slaps when as cunning as a crook. As cunning as a rage on she'll be right damper. Get a dog up ya booze with as busy as a paddock.\n"
-      + "Lets throw a maccas my as cunning as a fisho. Trent from punchy ropeable piece of piss as dry as a fair go. Grab us a cracker no worries lets get some chokkie. Lets throw a durry no worries he's got a massive drongo. Grab us a stonkered flamin she'll be right hoon. She'll be right fisho heaps she'll be right lizard drinking. He's got a massive stoked where it'll be going off. As cross as a pig's arse mate lets get some sheila. As cross as a metho my lets throw a digger. It'll be garbo no dramas flat out like a kero. As busy as a swagger mate we're going grog.\n"
-      + "Stands out like a schooner bloody as cross as a truckie. She'll be right rip snorter flamin she'll be right butcher. Trent from punchy flick to as dry as a longneck. Gutful of yabber flamin shazza got us some gutta. As dry as a chunder flamin lets get some pozzy. She'll be right cut lunch to flat out like a longneck. strewth when gutful of flick. As dry as a gyno how as busy as a fruit loop. It'll be banana bender flamin come a true blue. As dry as a g'day flamin you little ripper divvy van. Trent from punchy banana bender when as cross as a bludger.\n"
-      + "As cunning as a mates how she'll be right tucker. Stands out like a his blood's worth bottling flamin she'll be right wobbly. Lets throw a pav when stands out like a mokkies. She'll be right butcher when she'll be right wuss. Built like a longneck piece of piss built like a parma. He hasn't got a dipstick where gutful of joey. He's got a massive avos no dramas she'll be right sanger. As cross as a freo piece of piss as busy as a sickie. Stands out like a bunyip to grab us a bail up. Lets get some bloke flamin it'll be rego. captain cook piece of piss as dry as a milk bar.\n"
-      + "Lets get some dunny no dramas she'll be right fly wire. bludger how it'll be jumbuck. Shazza got us some fisho uluru. You little ripper crook with you little ripper struth. He hasn't got a wuss where shazza got us some kindie. He's got a massive give it a burl heaps lets throw a ripper. He hasn't got a slaps shazza got us some big smoke. As stands out like holden how bushranger. As busy as a yobbo my shazza got us some fair go. As dry as a corker how built like a flake.\n"
-      + "It'll be chunder where grab us a bottlo. As busy as a greenie as cross as a boozer. He's got a massive dipstick piece of piss as dry as a thingo. Come a bizzo where he's got a massive stoked. As cunning as a fair go with as stands out like op shop. Gutful of decent nik flamin trent from punchy aussie salute. As dry as a frog in a sock with as dry as a ocker. As busy as a rotten piece of piss he hasn't got a bail out. Gutful of chunder when mad as a outback. Lets throw a old fella he hasn't got a prezzy.\n"
-      + "It'll be pint no worries trent from punchy larrikin. As dry as a jackaroo to as busy as a spit the dummy. As dry as a aussie salute when as cross as a ridgy-didge. Flat out like a corker no dramas as stands out like squizz. As dry as a mates bloody as dry as a chokkie. Gutful of his blood's worth bottling when grab us a cark it. Stands out like a banana bender flamin he's got a massive bitzer.\n"
+        assert.equals(data.toString(), Boganizer.boganData)
+        callback()
+      })
+    }
 
-function Boganizer() {
-  Steez.call(this)
-
-  this._data = boganData.split('\n')
-  this._index = 0
-  this._to = setInterval(this._gobogan.bind(this), 0)
-}
-
-util.inherits(Boganizer, Steez)
-
-Boganizer.prototype._gobogan = function () {
-  var idx = this._index++
-    , last = idx >= this._data.length - 1
-
-  this.write(new Buffer(this._data[idx] + (last ? '' : ' ')))
-  if (last) {
-    clearInterval(this._to)
-    this.end()
-  }
-}
-
-// Pipe to a bunch of output streams simultaneously
-
-buster.testCase('Boganizer', {
+buster.testCase('Multi-pipe test', {
     'setUp': function() {
-      this.timeout = 1000
+      this.timeout = 10000
       this.files = []
-      for (var i = 0; i < 100; i++) this.files.push('$$_boganized_test_' + i + '_$$')
     }
 
   , 'tearDown': function (done) {
       async.forEach(this.files, fs.unlink, done)
     }
 
-  , 'test multi-file write': function (done) {
-      var boganizer = new Boganizer()
-        , verifyFile = function (file, callback) {
-            fs.readFile(file, function (err, data) {
-              refute(err)
-              return callback(err)
+    // Pipe to a bunch of fs.createWriteStreams simultaneously
+  , 'direct fs.createWriteStream': {
+        'setUp': function() {
+          for (var i = 0; i < 100; i++) this.files.push('$$_boganized_test_' + i + '_$$')
+        }
 
-              assert.equals(data.toString(), boganData)
-              callback()
-            })
-          }
-        , verify = function () {
-            async.forEach(this.files, verifyFile, done)
-          }.bind(this)
+      , 'test multi-file write': function (done) {
+          var boganizer = new Boganizer()
+              // verify that they all have the correct output
+            , verify = function () {
+                // delay a little big because we're at the 'end' of boganizer, not the fs streams
+                // so they still may be writing
+                setTimeout(function () {
+                  async.forEach(this.files, verifyBoganFile, done)
+                }.bind(this), 50)
+              }.bind(this)
 
-      this.files.forEach(function (file) {
-        boganizer.pipe(fs.createWriteStream(file))
-      })
-      boganizer.on('end', verify)
+          this.files.forEach(function (file) {
+            boganizer.pipe(fs.createWriteStream(file))
+          })
+          boganizer.on('end', verify)
+        }
     }
+
+  , 'throttled fs.createWriteStream': {
+        'test multi-file throttled write': function (done) {
+          var boganizer   = new Boganizer()
+            , start       = +new Date
+            , dataEvents  = 0
+            , endedCount  = 0
+            , maxInterval = 120
+
+              // verify that all the files actually have the right output
+            , verify = function () {
+                async.forEach(this.files, verifyBoganFile, done)
+              }.bind(this)
+
+              // for *each* stream, we check that the total duration is within
+              // +/- 10ms of what we expect per event for the maxInterval stream
+              // i.e., even the 10ms per event stream should take roughly
+              // maxInterval per event to execute
+            , onEnd      = function (msg) {
+                var duration = +new Date - start
+                  , perEvent = duration / dataEvents
+
+                msg = msg + ' took ' + perEvent + ' ms'
+                assert(perEvent > maxInterval - 10, msg)
+                assert(perEvent < maxInterval + 10, msg)
+
+                if (++endedCount == this.files.length)
+                  verify()
+              }.bind(this)
+
+          // attach the boganizer to various, different speed streams
+          // it should take as long as it takes the longest one to finish
+          this.files.push('$$_boganized_test_throttled_10_$$')
+          boganizer.pipe(new SlowStream({ maxWriteInterval: 10 }))
+            .pipe(fs.createWriteStream(this.files[this.files.length - 1]))
+            .on('close', onEnd.bind(this, '10 ms throttled stream'))
+          this.files.push('$$_boganized_test_throttled_20_$$')
+          boganizer.pipe(new SlowStream({ maxWriteInterval: 20 }))
+            .pipe(fs.createWriteStream(this.files[this.files.length - 1]))
+            .on('close', onEnd.bind(this, '20 ms throttled stream'))
+          this.files.push('$$_boganized_test_throttled_max_$$')
+          boganizer.pipe(new SlowStream({ maxWriteInterval: maxInterval }))
+            .pipe(fs.createWriteStream(this.files[this.files.length - 1]))
+            .on('close', onEnd.bind(this, maxInterval + ' ms throttled stream'))
+          this.files.push('$$_boganized_test_throttled_40_$$')
+          boganizer.pipe(new SlowStream({ maxWriteInterval: 40 }))
+            .pipe(fs.createWriteStream(this.files[this.files.length - 1]))
+            .on('close', onEnd.bind(this, '40 ms throttled stream'))
+          this.files.push('$$_boganized_test_throttled_30_$$')
+          boganizer.pipe(new SlowStream({ maxWriteInterval: 30 }))
+            .pipe(fs.createWriteStream(this.files[this.files.length - 1]))
+            .on('close', onEnd.bind(this, '30 ms throttled stream'))
+          boganizer.on('data', function () { dataEvents++ })
+        }
+    }
+
 })
