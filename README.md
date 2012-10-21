@@ -22,10 +22,23 @@ magic built in to make your stream behave nicely.
 Features
 --------
 
-* Transparent `data` event queueing (by hijacking `emit()`)
+* Transparent `data` event queueing (by hijacking `emit()`) ([more](#buffering))
 * Accurate `pause()`, `resume()`, `end()`, `destroySoon()` and `destroy()`
   implementations out of the box
 * Multi-target stream synchronisation (more on this [below](#multi-target-pipe))
+
+Buffering
+---------
+
+Steez internally hijacks your `emit()` method, catching `data` events and
+queueing them if the stream is in a paused state (if `this.paused` is true).
+When emitting data, it's advised that you check for the state of `this.paused`;
+if it's not `0`, hold off on sending any more data until Steez emits a `drain`
+event.
+
+**WARNING**: If you continue to emit data at a high rate while the stream is
+paused, there's a chance you'll blow out your memory usage as events will be
+indefinitely buffered.
 
 Multi-Target `pipe()`
 ---------------------
