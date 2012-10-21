@@ -19,7 +19,8 @@
   "devDependencies": {
     "buster": "*",
     "concat-stream": "*",
-    "async": "*"
+    "async": "*",
+    "slow-stream": "*"
   },
   "scripts": {
     "test": "./node_modules/.bin/buster-test"
