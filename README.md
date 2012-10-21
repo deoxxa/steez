@@ -25,6 +25,8 @@ Features
 * Transparent `data` event queueing (by hijacking `emit()`) ([more](#buffering))
 * Accurate `pause()`, `resume()`, `end()`, `destroySoon()` and `destroy()`
   implementations out of the box
+* Ability to override certain behaviours on a per-implementation basis
+  ([more](#overridable-methods))
 * Multi-target stream synchronisation (more on this [below](#multi-target-pipe))
 
 Buffering
@@ -39,6 +41,24 @@ event.
 **WARNING**: If you continue to emit data at a high rate while the stream is
 paused, there's a chance you'll blow out your memory usage as events will be
 indefinitely buffered.
+
+Overridable Methods
+-------------------
+
+Steez has a few methods you can implement to alter its behaviour; they are as
+follows:
+
+`can_destroy`: return a truthy value if the stream has no pending tasks and can
+be destroyed safely. This is useful if you perform any asynchronous tasks in
+your stream, as they will not count towards the stream's internal queue.
+
+`on_pause`: this is called (if it exists) when Steez goes from being not paused
+to paused. Note that this is not as simple as just being called every time
+`pause()` is called, due to the multi-target stream synchronisation.
+
+`on_resume`: this is called (if it exists) when Steez goes from being paused to
+not paused. This is the same as `on_pause` in that it's not just called whenever
+`resume()` is called, but rather when all streams have `resume()`ed the stream.
 
 Multi-Target `pipe()`
 ---------------------

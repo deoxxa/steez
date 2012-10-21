@@ -38,7 +38,13 @@ Steez.prototype.pause = function pause() {
 };
 
 Steez.prototype._pause = function _pause(pindex) {
+  var was_paused = this.paused !== 0;
+
   this.paused |= pindex;
+
+  if (!was_paused && this.paused !== 0 && typeof this.on_pause === "function") {
+    this.on_pause();
+  }
 
   return this;
 };
@@ -48,12 +54,18 @@ Steez.prototype.resume = function resume() {
 };
 
 Steez.prototype._resume = function _resume(pindex) {
+  var was_paused = this.paused !== 0;
+
   if (this.paused & pindex) {
     this.paused ^= pindex;
   }
 
   if (this.closed) {
     return this;
+  }
+
+  if (was_paused && this.paused === 0 && typeof this.on_resume === "function") {
+    this.on_resume();
   }
 
   return this.flush();
