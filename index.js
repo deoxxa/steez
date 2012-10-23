@@ -68,6 +68,10 @@ Steez.prototype._resume = function _resume(pindex) {
     this.on_resume();
   }
 
+  if (!was_paused) {
+    return this;
+  }
+
   return this.flush();
 };
 
